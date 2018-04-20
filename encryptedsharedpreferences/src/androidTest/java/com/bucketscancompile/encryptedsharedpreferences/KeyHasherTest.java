@@ -9,8 +9,8 @@ import com.bucketscancompile.encryptedsharedpreferences.crypto.CryptoException;
 import com.bucketscancompile.encryptedsharedpreferences.crypto.LegacyAesCrypto;
 import com.bucketscancompile.encryptedsharedpreferences.utils.Logging;
 
-import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -27,7 +27,8 @@ import static org.junit.Assert.assertNotEquals;
 public class KeyHasherTest {
 
     private final static String PLAINTEXT = "TestString1234```]]]_ *98//^^^^^";
-    private final static int CYCLES = 100;
+    private static int BATCH_ELEMENTS = 10;
+    private static int BENCHMARK_CYCLES = 100;
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -57,8 +58,8 @@ public class KeyHasherTest {
 
     @Test
     public void hashSHA512BatchTwice() throws CryptoException {
-        final List<String> plaintextList = new ArrayList<>(CYCLES);
-        for (int i = 0; i < CYCLES; i++)
+        final List<String> plaintextList = new ArrayList<>(BATCH_ELEMENTS);
+        for (int i = 0; i < BATCH_ELEMENTS; i++)
             plaintextList.add(PLAINTEXT);
         final String[] plaintextArray = plaintextList.toArray(new String[plaintextList.size()]);
 
@@ -124,8 +125,8 @@ public class KeyHasherTest {
 
     @Test
     public void hashJavaPBKDFBatchTwice() throws CryptoException {
-        final List<String> plaintextList = new ArrayList<>(CYCLES);
-        for (int i = 0; i < CYCLES; i++)
+        final List<String> plaintextList = new ArrayList<>(BATCH_ELEMENTS);
+        for (int i = 0; i < BATCH_ELEMENTS; i++)
             plaintextList.add(PLAINTEXT);
         final String[] plaintextArray = plaintextList.toArray(new String[plaintextList.size()]);
 
@@ -240,6 +241,7 @@ public class KeyHasherTest {
         assertNotEquals("Hashes should be different", hash1, hash2);
     }
 
+    @Ignore
     @Test
     public void timingWithKeyOnDemand() throws CryptoException {
         final Context context = InstrumentationRegistry.getTargetContext();
@@ -251,6 +253,7 @@ public class KeyHasherTest {
         timingBackend(hasher);
     }
 
+    @Ignore
     @Test
     public void timingWithKeyInMemory() throws CryptoException {
         final Context context = InstrumentationRegistry.getTargetContext();
@@ -263,8 +266,8 @@ public class KeyHasherTest {
     }
 
     private void timingBackend(KeyHasher hasher) throws CryptoException {
-        final List<String> plaintextList = new ArrayList<>(CYCLES);
-        for (int i = 0; i < CYCLES; i++)
+        final List<String> plaintextList = new ArrayList<>(BENCHMARK_CYCLES);
+        for (int i = 0; i < BENCHMARK_CYCLES; i++)
             plaintextList.add(PLAINTEXT);
         final String[] plaintextArray = plaintextList.toArray(new String[plaintextList.size()]);
 
@@ -273,33 +276,33 @@ public class KeyHasherTest {
 
         // SHA512 MessageDigest
         startTime = System.currentTimeMillis();
-        for (int i = 0; i < CYCLES; i++)
+        for (int i = 0; i < BENCHMARK_CYCLES; i++)
             hasher.hashSHA512(PLAINTEXT);
         endTime = System.currentTimeMillis();
-        average = (float)(endTime - startTime) / CYCLES;
-        System.out.println("Hashing average (" + CYCLES + " cycles): SHA512 MessageDigest " + average);
+        average = (float)(endTime - startTime) / BENCHMARK_CYCLES;
+        System.out.println("Hashing average (" + BENCHMARK_CYCLES + " cycles): SHA512 MessageDigest " + average);
 
         // SHA512 MessageDigest batch mode
         startTime = System.currentTimeMillis();
         hasher.hashBatchSHA512(plaintextArray);
         endTime = System.currentTimeMillis();
-        average = (float)(endTime - startTime) / CYCLES;
-        System.out.println("Hashing average (" + CYCLES + " cycles): SHA512 MessageDigest batch " + average);
+        average = (float)(endTime - startTime) / BENCHMARK_CYCLES;
+        System.out.println("Hashing average (" + BENCHMARK_CYCLES + " cycles): SHA512 MessageDigest batch " + average);
 
         // PBKDF2 SecretKeyFactory
         startTime = System.currentTimeMillis();
-        for (int i = 0; i < CYCLES; i++)
+        for (int i = 0; i < BENCHMARK_CYCLES; i++)
             hasher.hashJavaPBKDF(PLAINTEXT);
         endTime = System.currentTimeMillis();
-        average = (float)(endTime - startTime) / CYCLES;
-        System.out.println("Hashing average (" + CYCLES + " cycles): PBKDF2 SecretKeyFactory " + average);
+        average = (float)(endTime - startTime) / BENCHMARK_CYCLES;
+        System.out.println("Hashing average (" + BENCHMARK_CYCLES + " cycles): PBKDF2 SecretKeyFactory " + average);
 
         // PBKDF2 SecretKeyFactory batch
         startTime = System.currentTimeMillis();
         hasher.hashBatchJavaPBKDF(plaintextArray);
         endTime = System.currentTimeMillis();
-        average = (float)(endTime - startTime) / CYCLES;
-        System.out.println("Hashing average (" + CYCLES + " cycles): PBKDF2 SecretKeyFactory batch " + average);
+        average = (float)(endTime - startTime) / BENCHMARK_CYCLES;
+        System.out.println("Hashing average (" + BENCHMARK_CYCLES + " cycles): PBKDF2 SecretKeyFactory batch " + average);
 
         // PBKDF2 SpongyCastle
         /*startTime = System.currentTimeMillis();

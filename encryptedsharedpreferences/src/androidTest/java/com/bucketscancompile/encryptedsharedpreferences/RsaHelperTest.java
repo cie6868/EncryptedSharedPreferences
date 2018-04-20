@@ -10,6 +10,7 @@ import com.bucketscancompile.encryptedsharedpreferences.crypto.KeyStorageLocatio
 import com.bucketscancompile.encryptedsharedpreferences.utils.Logging;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -27,7 +28,8 @@ import static org.junit.Assert.assertNull;
 public class RsaHelperTest {
 
     private final static String PLAINTEXT = "TestString1234```]]]_ *98//^^^^^";
-    private static int CYCLES = 100;
+    private static int BATCH_ELEMENTS = 10;
+    private static int BENCHMARK_CYCLES = 100;
 
     @BeforeClass
     public static void enableLogging() {
@@ -82,8 +84,8 @@ public class RsaHelperTest {
 
     @Test
     public void encryptAndDecryptBytesBatch() throws CryptoException {
-        final List<byte[]> plaintextBytesList = new ArrayList<>(CYCLES);
-        for (int i = 0; i < CYCLES; i++)
+        final List<byte[]> plaintextBytesList = new ArrayList<>(BATCH_ELEMENTS);
+        for (int i = 0; i < BATCH_ELEMENTS; i++)
             plaintextBytesList.add(PLAINTEXT.getBytes());
         final byte[][] plaintextBytesBatch = plaintextBytesList.toArray(new byte[plaintextBytesList.size()][]);
 
@@ -126,8 +128,8 @@ public class RsaHelperTest {
 
     @Test
     public void encryptAndDecryptStringsBatch() throws CryptoException {
-        final Set<String> plaintextStringsSet = new HashSet<>(CYCLES);
-        for (int i = 0; i < CYCLES; i++)
+        final Set<String> plaintextStringsSet = new HashSet<>(BATCH_ELEMENTS);
+        for (int i = 0; i < BATCH_ELEMENTS; i++)
             plaintextStringsSet.add(PLAINTEXT);
 
         final Context context = InstrumentationRegistry.getTargetContext();
@@ -147,10 +149,11 @@ public class RsaHelperTest {
         assertEquals("Original and encrypted-decrypted output should be equal", plaintextStringsSet, decryptedStringsBatch);
     }
 
+    @Ignore
     @Test
     public void timing() throws CryptoException {
-        final Set<String> plaintextSet = new HashSet<>(CYCLES);
-        for (int i = 0; i < CYCLES; i++)
+        final Set<String> plaintextSet = new HashSet<>(BENCHMARK_CYCLES);
+        for (int i = 0; i < BENCHMARK_CYCLES; i++)
             plaintextSet.add(PLAINTEXT);
 
         final Context context = InstrumentationRegistry.getTargetContext();
@@ -170,33 +173,33 @@ public class RsaHelperTest {
         // encrypt
         String encrypted = "";
         startTime = System.currentTimeMillis();
-        for (int i = 0; i < CYCLES; i++)
+        for (int i = 0; i < BENCHMARK_CYCLES; i++)
             encrypted = rsa.encrypt(PLAINTEXT);
         endTime = System.currentTimeMillis();
-        average = (float)(endTime - startTime) / CYCLES;
-        System.out.println("Encryption average time (" + CYCLES + " cycles): " + average);
+        average = (float)(endTime - startTime) / BENCHMARK_CYCLES;
+        System.out.println("Encryption average time (" + BENCHMARK_CYCLES + " cycles): " + average);
 
         // decrypt batch
         startTime = System.currentTimeMillis();
-        for (int i = 0; i < CYCLES; i++)
+        for (int i = 0; i < BENCHMARK_CYCLES; i++)
             rsa.decrypt(encrypted);
         endTime = System.currentTimeMillis();
-        average = (float)(endTime - startTime) / CYCLES;
-        System.out.println("Decryption average time (" + CYCLES + " cycles): " + average);
+        average = (float)(endTime - startTime) / BENCHMARK_CYCLES;
+        System.out.println("Decryption average time (" + BENCHMARK_CYCLES + " cycles): " + average);
 
         // encrypt batch
         startTime = System.currentTimeMillis();
         Set<String> encryptedBatch = rsa.encrypt(plaintextSet);
         endTime = System.currentTimeMillis();
-        average = (float)(endTime - startTime) / CYCLES;
-        System.out.println("Encryption average time (" + CYCLES + " cycles): batch " + average);
+        average = (float)(endTime - startTime) / BENCHMARK_CYCLES;
+        System.out.println("Encryption average time (" + BENCHMARK_CYCLES + " cycles): batch " + average);
 
         // decrypt batch
         startTime = System.currentTimeMillis();
         rsa.decrypt(encryptedBatch);
         endTime = System.currentTimeMillis();
-        average = (float)(endTime - startTime) / CYCLES;
-        System.out.println("Decryption average time (" + CYCLES + " cycles): batch " + average);
+        average = (float)(endTime - startTime) / BENCHMARK_CYCLES;
+        System.out.println("Decryption average time (" + BENCHMARK_CYCLES + " cycles): batch " + average);
 
         System.out.println("RsaHelper benchmarks completed");
     }

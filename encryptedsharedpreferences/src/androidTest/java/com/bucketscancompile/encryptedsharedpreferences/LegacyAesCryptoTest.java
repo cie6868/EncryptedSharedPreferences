@@ -11,6 +11,7 @@ import com.bucketscancompile.encryptedsharedpreferences.crypto.LegacyAesCrypto;
 import com.bucketscancompile.encryptedsharedpreferences.utils.Logging;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -28,7 +29,8 @@ import static org.junit.Assert.assertEquals;
 public class LegacyAesCryptoTest {
 
     private final static String PLAINTEXT = "TestString1234```]]]_ *98//^^^^^";
-    private static int CYCLES = 100;
+    private static int BATCH_ELEMENTS = 10;
+    private static int BENCHMARK_CYCLES = 100;
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -79,8 +81,8 @@ public class LegacyAesCryptoTest {
 
     @Test
     public void encryptAndDecryptBytesBatch() throws CryptoException {
-        final List<byte[]> plaintextBytesList = new ArrayList<>(CYCLES);
-        for (int i = 0; i < CYCLES; i++)
+        final List<byte[]> plaintextBytesList = new ArrayList<>(BATCH_ELEMENTS);
+        for (int i = 0; i < BATCH_ELEMENTS; i++)
             plaintextBytesList.add(PLAINTEXT.getBytes());
         final byte[][] plaintextBytesBatch = plaintextBytesList.toArray(new byte[plaintextBytesList.size()][]);
 
@@ -123,8 +125,8 @@ public class LegacyAesCryptoTest {
 
     @Test
     public void encryptAndDecryptStringBatch() throws CryptoException {
-        final Set<String> plaintextStringsSet = new HashSet<>(CYCLES);
-        for (int i = 0; i < CYCLES; i++)
+        final Set<String> plaintextStringsSet = new HashSet<>(BATCH_ELEMENTS);
+        for (int i = 0; i < BATCH_ELEMENTS; i++)
             plaintextStringsSet.add(PLAINTEXT);
 
         final Context context = InstrumentationRegistry.getTargetContext();
@@ -227,6 +229,7 @@ public class LegacyAesCryptoTest {
         System.out.println("decrypted = " + decrypted);
     }
 
+    @Ignore
     @Test
     public void timingWithKeyOnDemand() throws CryptoException {
         final Context context = InstrumentationRegistry.getTargetContext();
@@ -238,6 +241,7 @@ public class LegacyAesCryptoTest {
         timingBackend(aes);
     }
 
+    @Ignore
     @Test
     public void timingWithKeyInMemory() throws CryptoException {
         final Context context = InstrumentationRegistry.getTargetContext();
@@ -251,8 +255,8 @@ public class LegacyAesCryptoTest {
     }
 
     private void timingBackend(Crypto aes) throws CryptoException {
-        final Set<String> plaintextStringsSet = new HashSet<>(CYCLES);
-        for (int i = 0; i < CYCLES; i++)
+        final Set<String> plaintextStringsSet = new HashSet<>(BENCHMARK_CYCLES);
+        for (int i = 0; i < BENCHMARK_CYCLES; i++)
             plaintextStringsSet.add(PLAINTEXT);
 
         System.out.println(aes.getKeyStorageLocation() == KeyStorageLocation.SECURE ? "AES is being processed in TEE" : "AES is processed in software");
@@ -263,33 +267,33 @@ public class LegacyAesCryptoTest {
         // encrypt
         String encrypted = "";
         startTime = System.currentTimeMillis();
-        for (int i = 0; i < CYCLES; i++)
+        for (int i = 0; i < BENCHMARK_CYCLES; i++)
             encrypted = aes.encrypt(PLAINTEXT);
         endTime = System.currentTimeMillis();
-        average = (float)(endTime - startTime) / CYCLES;
-        System.out.println("Encryption average time (" + CYCLES + " cycles): " + average);
+        average = (float)(endTime - startTime) / BENCHMARK_CYCLES;
+        System.out.println("Encryption average time (" + BENCHMARK_CYCLES + " cycles): " + average);
 
         // decrypt batch
         startTime = System.currentTimeMillis();
-        for (int i = 0; i < CYCLES; i++)
+        for (int i = 0; i < BENCHMARK_CYCLES; i++)
             aes.decrypt(encrypted);
         endTime = System.currentTimeMillis();
-        average = (float)(endTime - startTime) / CYCLES;
-        System.out.println("Decryption average time (" + CYCLES + " cycles): " + average);
+        average = (float)(endTime - startTime) / BENCHMARK_CYCLES;
+        System.out.println("Decryption average time (" + BENCHMARK_CYCLES + " cycles): " + average);
 
         // encrypt batch
         startTime = System.currentTimeMillis();
         Set<String> encryptedBatch = aes.encrypt(plaintextStringsSet);
         endTime = System.currentTimeMillis();
-        average = (float)(endTime - startTime) / CYCLES;
-        System.out.println("Encryption average time (" + CYCLES + " cycles): batch " + average);
+        average = (float)(endTime - startTime) / BENCHMARK_CYCLES;
+        System.out.println("Encryption average time (" + BENCHMARK_CYCLES + " cycles): batch " + average);
 
         // decrypt batch
         startTime = System.currentTimeMillis();
         aes.decrypt(encryptedBatch);
         endTime = System.currentTimeMillis();
-        average = (float)(endTime - startTime) / CYCLES;
-        System.out.println("Decryption average time (" + CYCLES + " cycles): batch " + average);
+        average = (float)(endTime - startTime) / BENCHMARK_CYCLES;
+        System.out.println("Decryption average time (" + BENCHMARK_CYCLES + " cycles): batch " + average);
 
         System.out.println("LegacyAesCrypto benchmarks completed");
     }

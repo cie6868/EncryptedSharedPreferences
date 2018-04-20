@@ -8,6 +8,7 @@ import com.bucketscancompile.encryptedsharedpreferences.crypto.CryptoException;
 import com.bucketscancompile.encryptedsharedpreferences.utils.Logging;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -29,8 +30,7 @@ public class PreferencesTest {
     private final static String KEY_LONG = "000";
     private final static String KEY_STRING_SET = "//^^123123ABCabc```";
 
-    private final static String PLAINTEXT = "TestString1234```]]]_ *98//^^^^^";
-    private final static int CYCLES = 100;
+    private final static int BENCHMARK_CYCLES = 100;
 
     @BeforeClass
     public static void enableLogging() {
@@ -115,6 +115,7 @@ public class PreferencesTest {
         assertFalse("String set should not exist", prefs.contains(KEY_STRING_SET));
     }
 
+    @Ignore
     @Test
     public void timingWithAesKeyOnDemand() throws CryptoException {
         System.out.println("Starting ESP benchmark with AES key decrpyted on demand");
@@ -125,6 +126,7 @@ public class PreferencesTest {
         timingBackend(prefs);
     }
 
+    @Ignore
     @Test
     public void timingWithAesKeyInMemory() throws CryptoException {
         System.out.println("Starting ESP benchmark with decrypted AES key stored in memory");
@@ -148,7 +150,7 @@ public class PreferencesTest {
         long storageStartTime, storageEndTime, retrievalStartTime, retrievalEndTime;
 
         storageStartTime = System.currentTimeMillis();
-        for (int i = 0; i < CYCLES; i++) {
+        for (int i = 0; i < BENCHMARK_CYCLES; i++) {
             final EncryptedSharedPreferences.Editor editor = prefs.edit();
             editor.putString(KEY_STRING, "abc!!!...321");
             editor.putInt(KEY_INT, 9981);
@@ -160,11 +162,11 @@ public class PreferencesTest {
         }
         storageEndTime = System.currentTimeMillis();
 
-        final float averageStorageTime = (float)(storageEndTime - storageStartTime) / CYCLES;
-        System.out.println("ESP store average (" + CYCLES + " cycles): " + averageStorageTime);
+        final float averageStorageTime = (float)(storageEndTime - storageStartTime) / BENCHMARK_CYCLES;
+        System.out.println("ESP store average (" + BENCHMARK_CYCLES + " cycles): " + averageStorageTime);
 
         retrievalStartTime = System.currentTimeMillis();
-        for (int i = 0; i < CYCLES; i++) {
+        for (int i = 0; i < BENCHMARK_CYCLES; i++) {
             prefs.getString(KEY_STRING, "");
             prefs.getInt(KEY_INT, -1);
             prefs.getBoolean(KEY_BOOLEAN, false);
@@ -174,8 +176,8 @@ public class PreferencesTest {
         }
         retrievalEndTime = System.currentTimeMillis();
 
-        final float averageRetrievalTime = (float)(retrievalEndTime - retrievalStartTime) / CYCLES;
-        System.out.println("ESP retrieve average (" + CYCLES + " cycles): " + averageRetrievalTime);
+        final float averageRetrievalTime = (float)(retrievalEndTime - retrievalStartTime) / BENCHMARK_CYCLES;
+        System.out.println("ESP retrieve average (" + BENCHMARK_CYCLES + " cycles): " + averageRetrievalTime);
 
         System.out.println("ESP benchmark completed");
     }
