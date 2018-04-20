@@ -1,5 +1,7 @@
 ﻿# EncryptedSharedPreferences
 
+ [![Build Status](https://travis-ci.org/cie6868/EncryptedSharedPreferences.svg?branch=master)](https://travis-ci.org/cie6868/EncryptedSharedPreferences)
+
 A wrapper for `SharedPreferences` that provides cryptographic obfuscation and data protection. Requires Android API 19 (KitKat) or higher. Released under the MIT Licence.
 
 ## Threat Model
