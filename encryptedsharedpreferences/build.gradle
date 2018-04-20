@@ -1,13 +1,16 @@
 apply plugin: 'com.android.library'
 
+project.ext.set("versionCode", 1)
+project.ext.set("versionName", "0.0.3")
+
 android {
     compileSdkVersion 27
 
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 1
-        versionName "1.0"
+        versionCode project.versionCode
+        versionName project.versionName
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -30,3 +33,38 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
 }
+
+ext {
+
+    bintrayRepo = 'EncryptedSharedPreferences'
+    bintrayName = 'EncryptedSharedPreferences'
+
+    publishedGroupId = 'com.bucketscancompile.encryptedsharedpreferences'
+    libraryName = 'EncryptedSharedPreferences'
+    artifact = 'encryptedsharedpreferences'
+
+    libraryDescription = 'A wrapper for SharedPreferences that provides cryptographic obfuscation and data protection.'
+
+    siteUrl = 'https://github.com/cie6868/EncryptedSharedPreferences'
+    gitUrl = 'https://github.com/cie6868/EncryptedSharedPreferences.git'
+
+    libraryVersion = project.versionName
+
+    developerId = 'cie6868'
+    developerName = 'BucketsCanCompile'
+    developerEmail = 'bucketscancompile@gmail.com'
+
+    licenseName = 'The MIT License'
+    licenseUrl = 'https://opensource.org/licenses/mit-license.php'
+    allLicenses = ["MIT"]
+
+}
+
+afterEvaluate {
+    tasks.bintrayUpload.doLast {
+        logger.lifecycle("Uploaded artifacts to bintray at version $version")
+    }
+}
+
+apply from: 'pom.gradle'
+apply from: 'bintray.gradle'
