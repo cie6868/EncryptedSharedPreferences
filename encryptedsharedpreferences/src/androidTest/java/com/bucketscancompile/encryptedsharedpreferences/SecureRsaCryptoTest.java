@@ -6,7 +6,9 @@ import android.support.test.runner.AndroidJUnit4;
 import com.bucketscancompile.encryptedsharedpreferences.crypto.Crypto;
 import com.bucketscancompile.encryptedsharedpreferences.crypto.CryptoException;
 import com.bucketscancompile.encryptedsharedpreferences.crypto.SecureRsaCrypto;
+import com.bucketscancompile.encryptedsharedpreferences.utils.Logging;
 
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -22,6 +24,11 @@ public class SecureRsaCryptoTest {
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
+
+    @BeforeClass
+    public static void enableLogging() {
+        Logging.create(true);
+    }
 
     @Test
     public void generateFreshKey() throws CryptoException {

@@ -7,7 +7,9 @@ import android.support.test.runner.AndroidJUnit4;
 import com.bucketscancompile.encryptedsharedpreferences.crypto.Crypto;
 import com.bucketscancompile.encryptedsharedpreferences.crypto.CryptoException;
 import com.bucketscancompile.encryptedsharedpreferences.crypto.KeyStorageLocation;
+import com.bucketscancompile.encryptedsharedpreferences.utils.Logging;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -26,6 +28,11 @@ public class RsaHelperTest {
 
     private final static String PLAINTEXT = "TestString1234```]]]_ *98//^^^^^";
     private static int CYCLES = 100;
+
+    @BeforeClass
+    public static void enableLogging() {
+        Logging.create(true);
+    }
 
     @Test
     public void generateFreshKeyAndDelete() throws CryptoException {

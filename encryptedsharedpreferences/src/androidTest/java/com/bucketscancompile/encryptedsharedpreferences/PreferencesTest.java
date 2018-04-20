@@ -5,7 +5,9 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.bucketscancompile.encryptedsharedpreferences.crypto.CryptoException;
+import com.bucketscancompile.encryptedsharedpreferences.utils.Logging;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -29,6 +31,11 @@ public class PreferencesTest {
 
     private final static String PLAINTEXT = "TestString1234```]]]_ *98//^^^^^";
     private final static int CYCLES = 100;
+
+    @BeforeClass
+    public static void enableLogging() {
+        Logging.create(true);
+    }
 
     private final EncryptedSharedPreferencesSettings settingsAesKeyOnDemand = new EncryptedSharedPreferencesSettings() {
         public Context context() { return InstrumentationRegistry.getTargetContext(); }

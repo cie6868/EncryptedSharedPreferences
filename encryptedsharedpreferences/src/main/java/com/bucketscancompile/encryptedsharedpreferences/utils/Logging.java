@@ -13,7 +13,8 @@ public class Logging {
     }
 
     public static void create(boolean allowLogging) {
-        instance = new Logging(allowLogging);
+        if (instance == null)
+            instance = new Logging(allowLogging);
     }
 
     public static Logging getInstance() {

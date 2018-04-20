@@ -8,7 +8,9 @@ import com.bucketscancompile.encryptedsharedpreferences.crypto.Crypto;
 import com.bucketscancompile.encryptedsharedpreferences.crypto.CryptoException;
 import com.bucketscancompile.encryptedsharedpreferences.crypto.KeyStorageLocation;
 import com.bucketscancompile.encryptedsharedpreferences.crypto.LegacyAesCrypto;
+import com.bucketscancompile.encryptedsharedpreferences.utils.Logging;
 
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -31,11 +33,16 @@ public class LegacyAesCryptoTest {
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
 
+    @BeforeClass
+    public static void enableLogging() {
+        Logging.create(true);
+    }
+
     @Test
     public void generateFreshKey() throws CryptoException {
         final Context context = InstrumentationRegistry.getTargetContext();
         final Crypto rsa = getRsaCrypto(context);
-        final Crypto aes = new LegacyAesCrypto(context, rsa, false);
+        final Crypto aes = getAesCrypto(context, rsa, false);
 
         // delete any existing keys
         if (aes.doesKeyExist())
@@ -53,7 +60,7 @@ public class LegacyAesCryptoTest {
     public void encryptAndDecryptBytes() throws CryptoException {
         final Context context = InstrumentationRegistry.getTargetContext();
         final Crypto rsa = getRsaCrypto(context);
-        final Crypto aes = new LegacyAesCrypto(context, rsa, false);
+        final Crypto aes = getAesCrypto(context, rsa, false);
 
         // make sure keys exist
         if (!aes.doesKeyExist())
@@ -79,7 +86,7 @@ public class LegacyAesCryptoTest {
 
         final Context context = InstrumentationRegistry.getTargetContext();
         final Crypto rsa = getRsaCrypto(context);
-        final Crypto aes = new LegacyAesCrypto(context, rsa, false);
+        final Crypto aes = getAesCrypto(context, rsa, false);
 
         // make sure keys exist
         if (!aes.doesKeyExist())
@@ -99,7 +106,7 @@ public class LegacyAesCryptoTest {
     public void encryptAndDecryptString() throws CryptoException {
         final Context context = InstrumentationRegistry.getTargetContext();
         final Crypto rsa = getRsaCrypto(context);
-        final Crypto aes = new LegacyAesCrypto(context, rsa, false);
+        final Crypto aes = getAesCrypto(context, rsa, false);
 
         // make sure keys exist
         if (!aes.doesKeyExist())
@@ -122,7 +129,7 @@ public class LegacyAesCryptoTest {
 
         final Context context = InstrumentationRegistry.getTargetContext();
         final Crypto rsa = getRsaCrypto(context);
-        final Crypto aes = new LegacyAesCrypto(context, rsa, false);
+        final Crypto aes = getAesCrypto(context, rsa, false);
 
         // make sure keys exist
         if (!aes.doesKeyExist())
@@ -143,7 +150,7 @@ public class LegacyAesCryptoTest {
         final Context context = InstrumentationRegistry.getTargetContext();
         final Crypto rsa = getRsaCrypto(context);
 
-        final Crypto aes1 = new LegacyAesCrypto(context, rsa, false);
+        final Crypto aes1 = getAesCrypto(context, rsa, false);
 
         // make sure keys exist
         if (!aes1.doesKeyExist())
@@ -154,7 +161,7 @@ public class LegacyAesCryptoTest {
         final String encrypted1 = aes1.encrypt(PLAINTEXT);
         final String encrypted2 = aes1.encrypt(PLAINTEXT + PLAINTEXT);
 
-        final Crypto aes2 = new LegacyAesCrypto(context, rsa, true);
+        final Crypto aes2 = getAesCrypto(context, rsa, true);
 
         assertEquals("Key should exist", true, aes2.doesKeyExist());
 
@@ -173,7 +180,7 @@ public class LegacyAesCryptoTest {
     public void deleteKey() throws CryptoException {
         final Context context = InstrumentationRegistry.getTargetContext();
         final Crypto rsax = getRsaCrypto(context);
-        final Crypto aes = new LegacyAesCrypto(context, rsax, false);
+        final Crypto aes = getAesCrypto(context, rsax, false);
 
         // make sure keys exist
         if (!aes.doesKeyExist())
@@ -197,7 +204,7 @@ public class LegacyAesCryptoTest {
     public void regenerateKey() throws CryptoException {
         final Context context = InstrumentationRegistry.getTargetContext();
         final Crypto rsax = getRsaCrypto(context);
-        final Crypto aes = new LegacyAesCrypto(context, rsax, true);
+        final Crypto aes = getAesCrypto(context, rsax, true);
 
         // make sure keys exist
         if (!aes.doesKeyExist())
@@ -224,7 +231,7 @@ public class LegacyAesCryptoTest {
     public void timingWithKeyOnDemand() throws CryptoException {
         final Context context = InstrumentationRegistry.getTargetContext();
         final Crypto rsax = getRsaCrypto(context);
-        final Crypto aes = new LegacyAesCrypto(context, rsax, false);
+        final Crypto aes = getAesCrypto(context, rsax, false);
 
         System.out.println("Starting LegacyAesCrypto benchmarks with key decrypted on demand");
 
@@ -235,7 +242,7 @@ public class LegacyAesCryptoTest {
     public void timingWithKeyInMemory() throws CryptoException {
         final Context context = InstrumentationRegistry.getTargetContext();
         final Crypto rsax = getRsaCrypto(context);
-        final Crypto aes = new LegacyAesCrypto(context, rsax, true);
+        final Crypto aes = getAesCrypto(context, rsax, true);
 
         System.out.println("Starting LegacyAesCrypto benchmarks with decrypted key held in memory");
 
@@ -287,13 +294,41 @@ public class LegacyAesCryptoTest {
         System.out.println("LegacyAesCrypto benchmarks completed");
     }
 
+    // generate new AES key if necessary
+    private Crypto getAesCrypto(Context context, Crypto rsa, boolean keyInMemory) throws CryptoException {
+        Crypto aes = new LegacyAesCrypto(context, rsa, keyInMemory);
+        boolean aesKeyExists;
+        try {
+            aesKeyExists = aes.doesKeyExist();
+        } catch (CryptoException ex) {
+            // cannot decrypt AES key
+            aesKeyExists = false;
+        }
+
+        if (aesKeyExists)
+            return aes;
+        else {
+            aes.generateKey();
+
+            if (aes.doesKeyExist())
+                return aes;
+            else
+                throw new CryptoException("Could not generate AES keys");
+        }
+    }
+
+    // generate new RSA key if necessary
     // RSA stuff has its own tests
     private Crypto getRsaCrypto(Context context) throws CryptoException {
-        final Crypto c = RsaHelper.getExistingCrypto(context, true);
-        if (c != null)
-            return c;
-        else
-            return RsaHelper.generateCrypto(context, true);
+        Crypto rsa = RsaHelper.getExistingCrypto(context, true);
+        if (rsa == null) {
+            rsa = RsaHelper.generateCrypto(context, true);
+
+            if (rsa == null)
+                throw new CryptoException("Could not generate RSA keys");
+        }
+
+        return rsa;
     }
 
 }

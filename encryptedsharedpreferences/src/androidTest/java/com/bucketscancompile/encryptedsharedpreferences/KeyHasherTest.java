@@ -7,7 +7,10 @@ import android.support.test.runner.AndroidJUnit4;
 import com.bucketscancompile.encryptedsharedpreferences.crypto.Crypto;
 import com.bucketscancompile.encryptedsharedpreferences.crypto.CryptoException;
 import com.bucketscancompile.encryptedsharedpreferences.crypto.LegacyAesCrypto;
+import com.bucketscancompile.encryptedsharedpreferences.utils.Logging;
 
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -29,11 +32,16 @@ public class KeyHasherTest {
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
 
+    @BeforeClass
+    public static void enableLogging() {
+        Logging.create(true);
+    }
+
     @Test
     public void generateFreshSalt() throws CryptoException {
         final Context context = InstrumentationRegistry.getTargetContext();
         final Crypto aes = getAesCrypto(context, false);
-        final KeyHasher hasher = new KeyHasher(context, aes);
+        final KeyHasher hasher = getHasher(context, aes);
 
         // delete any existing salt
         if (hasher.doesSaltExist())
@@ -56,7 +64,7 @@ public class KeyHasherTest {
 
         final Context context = InstrumentationRegistry.getTargetContext();
         final Crypto aes = getAesCrypto(context, false);
-        final KeyHasher hasher = new KeyHasher(context, aes);
+        final KeyHasher hasher = getHasher(context, aes);
 
         // make sure salt exists
         if (!hasher.doesSaltExist())
@@ -76,7 +84,7 @@ public class KeyHasherTest {
     public void hashSHA512Twice() throws CryptoException {
         final Context context = InstrumentationRegistry.getTargetContext();
         final Crypto aes = getAesCrypto(context, false);
-        final KeyHasher hasher = new KeyHasher(context, aes);
+        final KeyHasher hasher = getHasher(context, aes);
 
         // make sure salt exists
         if (!hasher.doesSaltExist())
@@ -97,7 +105,7 @@ public class KeyHasherTest {
     public void hashJavaPBKDFTwice() throws CryptoException {
         final Context context = InstrumentationRegistry.getTargetContext();
         final Crypto aes = getAesCrypto(context, false);
-        final KeyHasher hasher = new KeyHasher(context, aes);
+        final KeyHasher hasher = getHasher(context, aes);
 
         // make sure salt exists
         if (!hasher.doesSaltExist())
@@ -123,7 +131,7 @@ public class KeyHasherTest {
 
         final Context context = InstrumentationRegistry.getTargetContext();
         final Crypto aes = getAesCrypto(context, false);
-        final KeyHasher hasher = new KeyHasher(context, aes);
+        final KeyHasher hasher = getHasher(context, aes);
 
         // make sure salt exists
         if (!hasher.doesSaltExist())
@@ -139,12 +147,12 @@ public class KeyHasherTest {
         assertArrayEquals("Both hashes have the same salt and must be equal", hash1, hash2);
     }
 
-    // confirm hash output is constant for the same input
-    @Test
+    // we don't sponge anymore
+    /*@Test
     public void hashSpongyPBKDFTwice() throws CryptoException {
         final Context context = InstrumentationRegistry.getTargetContext();
         final Crypto aes = getAesCrypto(context, false);
-        final KeyHasher hasher = new KeyHasher(context, aes);
+        final KeyHasher hasher = getHasher(context, aes);
 
         // make sure salt exists
         if (!hasher.doesSaltExist())
@@ -159,9 +167,10 @@ public class KeyHasherTest {
 
         // equate
         assertEquals("Both hashes have the same salt and must be equal", hash1, hash2);
-    }
+    }*/
 
-    @Test
+    // we don't sponge anymore
+    /*@Test
     public void hashSpongyPBKDFBatchTwice() throws CryptoException {
         final List<String> plaintextList = new ArrayList<>(CYCLES);
         for (int i = 0; i < CYCLES; i++)
@@ -170,7 +179,7 @@ public class KeyHasherTest {
 
         final Context context = InstrumentationRegistry.getTargetContext();
         final Crypto aes = getAesCrypto(context, false);
-        final KeyHasher hasher = new KeyHasher(context, aes);
+        final KeyHasher hasher = getHasher(context, aes);
 
         // make sure salt exists
         if (!hasher.doesSaltExist())
@@ -185,14 +194,14 @@ public class KeyHasherTest {
 
         // equate
         assertArrayEquals("Both hashes have the same salt and must be equal", hash1, hash2);
-    }
+    }*/
 
     // data should not be hashed if salt is deleted
     @Test
     public void deleteHash() throws CryptoException {
         final Context context = InstrumentationRegistry.getTargetContext();
         final Crypto aesx = getAesCrypto(context, false);
-        final KeyHasher hasher = new KeyHasher(context, aesx);
+        final KeyHasher hasher = getHasher(context, aesx);
 
         // make sure salt exists
         if (!hasher.doesSaltExist())
@@ -212,7 +221,7 @@ public class KeyHasherTest {
     public void regenerateKey() throws CryptoException {
         final Context context = InstrumentationRegistry.getTargetContext();
         final Crypto aesx = getAesCrypto(context, false);
-        final KeyHasher hasher = new KeyHasher(context, aesx);
+        final KeyHasher hasher = getHasher(context, aesx);
 
         // make sure salt exists
         if (!hasher.doesSaltExist())
@@ -235,7 +244,7 @@ public class KeyHasherTest {
     public void timingWithKeyOnDemand() throws CryptoException {
         final Context context = InstrumentationRegistry.getTargetContext();
         final Crypto aes = getAesCrypto(context, false);
-        final KeyHasher hasher = new KeyHasher(context, aes);
+        final KeyHasher hasher = getHasher(context, aes);
 
         System.out.println("Starting hash benchmarks with AES key decrypted on demand");
 
@@ -246,7 +255,7 @@ public class KeyHasherTest {
     public void timingWithKeyInMemory() throws CryptoException {
         final Context context = InstrumentationRegistry.getTargetContext();
         final Crypto aes = getAesCrypto(context, true);
-        final KeyHasher hasher = new KeyHasher(context, aes);
+        final KeyHasher hasher = getHasher(context, aes);
 
         System.out.println("Starting hash benchmarks with decrypted AES key in memory");
 
@@ -293,30 +302,76 @@ public class KeyHasherTest {
         System.out.println("Hashing average (" + CYCLES + " cycles): PBKDF2 SecretKeyFactory batch " + average);
 
         // PBKDF2 SpongyCastle
-        startTime = System.currentTimeMillis();
+        /*startTime = System.currentTimeMillis();
         for (int i = 0; i < CYCLES; i++)
             hasher.hashSpongyPBKDF(PLAINTEXT);
         endTime = System.currentTimeMillis();
         average = (float)(endTime - startTime) / CYCLES;
-        System.out.println("Hashing average (" + CYCLES + " cycles): PBKDF2 SpongyCastle " + average);
+        System.out.println("Hashing average (" + CYCLES + " cycles): PBKDF2 SpongyCastle " + average);*/
 
         // PBKDF2 SpongyCastle batch
-        startTime = System.currentTimeMillis();
+        /*startTime = System.currentTimeMillis();
         hasher.hashBatchSpongyPBKDF(plaintextArray);
         endTime = System.currentTimeMillis();
         average = (float)(endTime - startTime) / CYCLES;
-        System.out.println("Hashing average (" + CYCLES + " cycles): PBKDF2 SpongyCastle batch " + average);
+        System.out.println("Hashing average (" + CYCLES + " cycles): PBKDF2 SpongyCastle batch " + average);*/
 
         System.out.println("Hash benchmarks completed");
     }
 
+    // generate RSA and AES keys if they are non-existent or unreadable
     // RSA stuff has its own tests
     private Crypto getAesCrypto(Context context, boolean keyInMemory) throws CryptoException {
         Crypto rsa = RsaHelper.getExistingCrypto(context, true);
-        if (rsa == null)
+        if (rsa == null) {
             rsa = RsaHelper.generateCrypto(context, true);
 
-        return new LegacyAesCrypto(context, rsa, keyInMemory);
+            if (rsa == null)
+                throw new CryptoException("Could not generate RSA keys");
+        }
+
+        Crypto aes = new LegacyAesCrypto(context, rsa, keyInMemory);
+        boolean aesKeyExists;
+        try {
+            aesKeyExists = aes.doesKeyExist();
+        } catch (CryptoException ex) {
+            // cannot decrypt AES key
+            aesKeyExists = false;
+        }
+
+        if (aesKeyExists)
+            return aes;
+        else {
+            aes.generateKey();
+
+            if (aes.doesKeyExist())
+                return aes;
+            else
+                throw new CryptoException("Could not generate AES keys");
+        }
+    }
+
+
+    private KeyHasher getHasher(Context context, Crypto aes) throws CryptoException {
+        KeyHasher hasher = new KeyHasher(context, aes);
+
+        boolean saltExists;
+        try {
+            saltExists = hasher.doesSaltExist();
+        } catch (CryptoException ex) {
+            // salt cannot be decrypted
+            saltExists = false;
+        }
+        if (saltExists)
+            return hasher;
+        else {
+            hasher.generateSalt();
+
+            if (hasher.doesSaltExist())
+                return hasher;
+            else
+                throw new CryptoException("Could not generate new salt");
+        }
     }
 
 }
