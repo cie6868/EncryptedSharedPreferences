@@ -37,4 +37,4 @@ before_script:
   - android-wait-for-emulator
   - adb shell input keyevent 82 &
 
-script: ./gradlew check connectedCheck --stacktrace
+script: ./gradlew check connectedCheck bintrayUpload --parallel --stacktrace
