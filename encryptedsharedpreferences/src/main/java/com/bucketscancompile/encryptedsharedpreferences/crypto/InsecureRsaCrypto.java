@@ -72,9 +72,6 @@ public class InsecureRsaCrypto extends Crypto {
     public void generateKey() throws CryptoException {
         Logging.getInstance().d(TAG, "generateKey: Generating key (RSA, keystore in preferences)");
 
-        if (doesKeyExist())
-            throw new CryptoException("Cannot generate key as it already exists (RSA, keystore in preferences)");
-
         // expiry date longer than the lifetime of your phone
         final Calendar nowTime = Calendar.getInstance();
         final Calendar expiryTime = Calendar.getInstance();

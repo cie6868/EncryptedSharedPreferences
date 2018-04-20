@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
-import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
@@ -82,9 +82,6 @@ public class LegacyAesCrypto extends Crypto {
     public void generateKey() throws CryptoException {
         Logging.getInstance().d(TAG, "generateKey: Generating key (AES, keystore in preferences)");
 
-        if (doesKeyExist())
-            throw new CryptoException("Cannot generate key as it already exists (AES, keystore in preferences)");
-
         final SecureRandom sr = new SecureRandom();
         final byte[] keyBytes = new byte[32];
         sr.nextBytes(keyBytes);
@@ -117,15 +114,15 @@ public class LegacyAesCrypto extends Crypto {
             final SecretKeySpec key = getKey();
 
             byte[] iv;
-            GCMParameterSpec gcmParameterSpec;
+            IvParameterSpec parameterSpec;
             ByteArrayOutputStream bos;
             CipherOutputStream cos;
             ByteBuffer byteBuffer;
             for (int i = 0; i < plaintextArray.length; i++) {
                 iv = generateIV();
 
-                gcmParameterSpec = new GCMParameterSpec(128, iv);
-                cipher.init(Cipher.ENCRYPT_MODE, key, gcmParameterSpec);
+                parameterSpec = new IvParameterSpec(iv);
+                cipher.init(Cipher.ENCRYPT_MODE, key, parameterSpec);
 
                 // stream to handle large data
                 bos = new ByteArrayOutputStream();
@@ -159,8 +156,8 @@ public class LegacyAesCrypto extends Crypto {
         final byte[] ciphertext;
         try {
             final Cipher cipher = Cipher.getInstance(ALGORITHM_MODE);
-            final GCMParameterSpec gcmSpec = new GCMParameterSpec(128, iv);
-            cipher.init(Cipher.ENCRYPT_MODE, getKey(), gcmSpec);
+            final IvParameterSpec parameterSpec = new IvParameterSpec(iv);
+            cipher.init(Cipher.ENCRYPT_MODE, getKey(), parameterSpec);
 
             // stream to handle large data
             final ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -196,7 +193,7 @@ public class LegacyAesCrypto extends Crypto {
             ByteBuffer ciphertextByteBuffer;
             int ivLength;
             byte[] iv, ciphertext;
-            GCMParameterSpec gcmParameterSpec;
+            IvParameterSpec parameterSpec;
             ByteArrayInputStream bis;
             CipherInputStream cis;
             ArrayList<Byte> buffer;
@@ -210,8 +207,8 @@ public class LegacyAesCrypto extends Crypto {
                 ciphertext = new byte[ciphertextByteBuffer.remaining()];
                 ciphertextByteBuffer.get(ciphertext);
 
-                gcmParameterSpec = new GCMParameterSpec(128, iv);
-                cipher.init(Cipher.DECRYPT_MODE, key, gcmParameterSpec);
+                parameterSpec = new IvParameterSpec(iv);
+                cipher.init(Cipher.DECRYPT_MODE, key, parameterSpec);
 
                 // stream to handle large data
                 bis = new ByteArrayInputStream(ciphertext);
@@ -248,8 +245,8 @@ public class LegacyAesCrypto extends Crypto {
 
         try {
             final Cipher cipher = Cipher.getInstance(ALGORITHM_MODE);
-            final GCMParameterSpec gcmSpec = new GCMParameterSpec(128, iv);
-            cipher.init(Cipher.DECRYPT_MODE, getKey(), gcmSpec);
+            final IvParameterSpec parameterSpec = new IvParameterSpec(iv);
+            cipher.init(Cipher.DECRYPT_MODE, getKey(), parameterSpec);
 
             // stream to handle large data
             final ByteArrayInputStream bis = new ByteArrayInputStream(ciphertext);

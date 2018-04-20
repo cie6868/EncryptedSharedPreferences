@@ -48,7 +48,7 @@ class KeyHasher {
      * @param context Context
      * @param aesCrypto {@link Crypto} object
      */
-    KeyHasher(@NonNull Context context, @NonNull Crypto aesCrypto) throws CryptoException {
+    KeyHasher(@NonNull Context context, @NonNull Crypto aesCrypto) {
         mPrefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         mAesCrypto = aesCrypto;
     }
@@ -63,7 +63,7 @@ class KeyHasher {
             try {
                 final String encryptedSaltString = mPrefs.getString(KEY_NAME, null);
                 if (encryptedSaltString == null)
-                    throw new CryptoException("Salt is null");
+                    throw new CryptoException("Salt is empty");
 
                 final byte[] encryptedSalt = Base64.decode(encryptedSaltString, Base64.NO_WRAP);
                 final byte[] saltBytes = mAesCrypto.decrypt(encryptedSalt);
