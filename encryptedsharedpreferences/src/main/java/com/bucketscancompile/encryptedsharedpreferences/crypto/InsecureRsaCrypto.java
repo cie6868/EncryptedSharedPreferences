@@ -25,9 +25,9 @@ import static java.security.spec.RSAKeyGenParameterSpec.F4;
 
 /**
  * Stores RSA keys in SharedPreferences. Anyone with root permission will be able to access the keys.
- * {@link com.bucketscancompile.encryptedsharedpreferences.RsaHelper} will use this as a fallback when {@link SecureRsaCrypto} fails.
+ * This should only ever be uses as a fallback if {@link SecureRsaCrypto} fails.
  *
- * <br/><br/>
+ * <br><br>
  *
  * This class exists because of the following bug:
  * <pre>
@@ -52,7 +52,7 @@ public class InsecureRsaCrypto extends Crypto {
 
     private SharedPreferences mPrefs;
 
-    public InsecureRsaCrypto(Context context) throws CryptoException {
+    public InsecureRsaCrypto(Context context) {
         super(context);
 
         mPrefs = mContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
@@ -64,7 +64,7 @@ public class InsecureRsaCrypto extends Crypto {
     }
 
     @Override
-    public boolean doesKeyExist() throws CryptoException {
+    public boolean doesKeyExist() {
         return mPrefs.contains(KEY_NAME_PRIVATE) && mPrefs.contains(KEY_NAME_PUBLIC);
     }
 

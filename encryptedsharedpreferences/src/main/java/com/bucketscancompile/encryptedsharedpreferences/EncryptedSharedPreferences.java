@@ -23,19 +23,20 @@ import java.util.Set;
  * The intention is to obfuscate the XML file that stores this data.
  * Ideally an attacker with root access to the device will be unable to read or modify the contents.
  *
- * <br/><br/>
+ * <br><br>
  *
  * Keys are stored as hashes, with a fixed salt protected by AES encryption.
  * RSA encryption is used to protect the AES key. The RSA keys are stored in hardware-backed secure storage in most devices.
  * Values are stored as AES-encrypted strings.
  * Denying {@code allowKeyInMemory} will minimise how long the decrypted AES key is kept in memory, but at a heavy performance penalty.
  *
- * <br/><br/>
+ * <br><br>
  *
  * Null values will be ignored in most cases, despite allowing nullable values for compatibility with {@link SharedPreferences}.
  * Cryptographic faults will result in a null output or no data modifications. The causes will get logged to debug.
  *
- * <br/><br/>
+ * <br><br>
+ *
  * The key names and data types must be known in order to access the corresponding values correctly.
  * Due to the one-way hashing of keys, {@link #getAll()} is not implemented as it would output nonsense keys.
  * {@link android.content.SharedPreferences.OnSharedPreferenceChangeListener} is yet to be implemented.
