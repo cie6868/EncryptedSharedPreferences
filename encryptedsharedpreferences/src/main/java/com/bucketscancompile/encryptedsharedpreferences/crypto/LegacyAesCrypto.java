@@ -43,7 +43,6 @@ public class LegacyAesCrypto extends Crypto {
 
     /**
      * Requires an RSA {@link Crypto} to store the AES key safely.
-     * Use {@link com.bucketscancompile.encryptedsharedpreferences.RsaHelper} to obtain this.
      * @param context Context
      * @param rsaCrypto {@link SecureRsaCrypto} or {@link InsecureRsaCrypto}
      * @param allowKeyInMemory If true, the key is stored in memory (faster but less secure)
