@@ -217,6 +217,10 @@ public class LegacyAesCrypto extends Crypto {
                 while ((next = cis.read()) != -1)
                     buffer.add((byte)next);
 
+                // buffer may be empty when the key is incorrect
+                if (buffer.isEmpty())
+                    throw new CryptoException("Cipher output is empty");
+
                 // convert buffer to byte array
                 plaintextArray[i] = new byte[buffer.size()];
                 for (int j = 0; j < buffer.size(); j++)
@@ -255,6 +259,10 @@ public class LegacyAesCrypto extends Crypto {
             int next;
             while ((next = cis.read()) != -1)
                 buffer.add((byte)next);
+
+            // buffer may be empty when the key is incorrect
+            if (buffer.isEmpty())
+                throw new CryptoException("Cipher output is empty");
 
             // convert buffer to byte array
             final byte[] out = new byte[buffer.size()];
