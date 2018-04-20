@@ -7,32 +7,36 @@ notifications:
 
 env:
   global:
-    - EMULATOR_API=24
+    - ANDROID_HOME=$HOME/android-sdk
+    - ANDROID_SDK_ROOT=$ANDROID_HOME
+    - ANDROID_BIN=$HOME/android-sdk/tools/bin
     - ADB_INSTALL_TIMEOUT=20
-
-android:
-  components:
-    - tools
-    - tools   # must be included twice
-    - platform-tools
-
-    - build-tools-27.0.3
-    - android-27
-    
-  licences:
-    - .+
 
 cache:
   directories:
     - $HOME/.gradle
+    - $ANDROID_HOME
+    - $HOME/android-sdk-dl
+    - $HOME/.android/build-cache
+    
+install:
+  # Download and unzip the Android SDK tools (if not already there thanks to the cache mechanism)
+  # Latest version available here: https://developer.android.com/studio/index.html#downloads
+  - if test ! -e $HOME/android-sdk-dl/sdk-tools.zip ; then curl https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip > $HOME/android-sdk-dl/sdk-tools.zip ; fi
+  - unzip -qq -n $HOME/android-sdk-dl/sdk-tools.zip -d $HOME/android-sdk
+
+  # Install or update Android SDK components (will not do anything if already up to date thanks to the cache mechanism)
+  - echo y | $ANDROID_BIN/sdkmanager 'tools' > /dev/null
+  - echo y | $ANDROID_BIN/sdkmanager 'platform-tools' > /dev/null
+  - echo y | $ANDROID_BIN/sdkmanager 'build-tools;27.0.3' > /dev/null
+  - echo y | $ANDROID_BIN/sdkmanager 'platforms;android-27' > /dev/null
+  - echo y | $ANDROID_BIN/sdkmanager 'platforms;android-24' > /dev/null
+  - echo y | $ANDROID_BIN/sdkmanager 'system-images;android-24;default;armeabi-v7a' > /dev/null   # no x86 on travis
+  - android list targets
     
 before_script:
   - chmod +x gradlew
-  - yes | sdkmanager "platforms;android-27"
-  - echo y | android update sdk -a --no-ui --filter android-$EMULATOR_API
-  - echo y | android update sdk -a --no-ui --filter sys-img-armeabi-v7a-android-$EMULATOR_API
-  - android list targets
-  - echo no | android create avd --force -n test -t android-$EMULATOR_API --abi armeabi-v7a
+  - echo no | $ANDROID_BIN/avdmanager create avd -n test -k 'system-images;android-24;default;armeabi-v7a'
   - emulator -avd test -no-skin -no-window &
   - android-wait-for-emulator
   - adb shell input keyevent 82 &
