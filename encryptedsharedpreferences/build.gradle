@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 
 project.ext.set("versionCode", 1)
-project.ext.set("versionName", "0.0.3")
+project.ext.set("versionName", "0.0.4")
 
 android {
     compileSdkVersion 27
