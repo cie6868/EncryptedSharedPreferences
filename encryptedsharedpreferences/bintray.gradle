@@ -30,7 +30,8 @@ artifacts {
 }
 
 Properties properties = new Properties()
-properties.load(project.rootProject.file('bintray.properties').newDataInputStream())
+if (file('bintray.properties').exists())
+    properties.load(project.rootProject.file('bintray.properties').newDataInputStream())
 
 bintray {
     user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
