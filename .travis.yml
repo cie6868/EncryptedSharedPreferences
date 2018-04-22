@@ -41,4 +41,6 @@ before_script:
   - android-wait-for-emulator
   - adb shell input keyevent 82 &
 
-script: ./gradlew check connectedCheck bintrayUpload --parallel --stacktrace
+script:
+  - echo 'Tag is' $TRAVIS_TAG
+  - if [[ $TRAVIS_TAG =~ ^v[0-9]+.[0-9]+.[0-9]+ ]]; then ./gradlew check connectedCheck bintrayUpload --parallel --stacktrace; else ./gradlew check connectedCheck --parallel --stacktrace; fi
