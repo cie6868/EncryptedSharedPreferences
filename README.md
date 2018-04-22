@@ -1,8 +1,13 @@
 ﻿# EncryptedSharedPreferences
 
  [![Build Status](https://travis-ci.org/cie6868/EncryptedSharedPreferences.svg?branch=master)](https://travis-ci.org/cie6868/EncryptedSharedPreferences)
+ [![Download](https://api.bintray.com/packages/cie6868/EncryptedSharedPreferences/EncryptedSharedPreferences/images/download.svg?version=0.1.0) ](https://bintray.com/cie6868/EncryptedSharedPreferences/EncryptedSharedPreferences/0.1.0/link)
 
 A wrapper for `SharedPreferences` that provides cryptographic obfuscation and data protection. Requires Android API 19 (KitKat) or higher. Released under the MIT Licence.
+
+```groovy
+compile 'com.bucketscancompile.encryptedsharedpreferences:encryptedsharedpreferences:0.1.0'
+```
 
 ## Threat Model
 
